@@ -1,42 +1,28 @@
 #include <iostream>
-using namespace std;
 
-typedef struct Stag{
-    int a,b,c,d;
-} S;
-
-// 下面两个会被认为是同一个函数签名？
-// const类型的函数是属于签名的一部分
-double imag(const double& im) {
-    return im;
-};
-double imag(const double im) {
-    return im;
+struct FourInts {
+    int a;
+    int b;
+    int c;
+    int d;
 };
 
-// 引用通常不用于声明变量 而用于参数类型和返回类型
+// 顶层 const 不属于按值形参的函数签名；因此不能再写一个 double imag(double)。
+double imag(const double& value) { return value; }
+
 int main() {
-    double x = 0;
-    double* p = &x;
-    double& r = x;
+    double value = 10.0;
+    double* pointer = &value;
+    double& reference = value;            // 引用必须在定义时绑定，之后不能改绑。
 
-    // #1 报错
-    // cout << imag(10.0) << endl;
+    reference = 20.0;                     // 实际修改的是 value。
+    std::cout << "imag: " << imag(value) << '\n';
+    std::cout << "value: " << value << ", *pointer: " << *pointer << '\n';
+    std::cout << "&value == &reference: " << (&value == &reference) << '\n';
 
-    cout << "sizeof(x):" << sizeof(x) << endl; // 8 double类型为8字节
-    cout << "sizeof(p):" << sizeof(p) << endl; // 8 指针为8字节
-    cout << "sizeof(r):" << sizeof(r) << endl; // 8 引用指代double x 也是8字节
-
-    cout << "x:" << x << endl;
-    cout << "r:" << r << endl;
-    cout << "p:" << p << endl;
-
-    // r引用指代x所以 r和x的地址一致
-    cout << "&x:" << &x << endl;
-    cout << "&r:"  << &r << endl;
-
-    S s;
-    S& rs = s;
-    cout << "s:" << sizeof(s) << endl;
-    cout << "rs:" << sizeof(rs) << endl;
+    FourInts object{};
+    FourInts& object_reference = object;
+    // sizeof(reference) 是被引用对象类型的大小，而不是“引用实现”的大小。
+    std::cout << "sizeof(object): " << sizeof(object)
+              << ", sizeof(object_reference): " << sizeof(object_reference) << '\n';
 }

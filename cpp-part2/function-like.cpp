@@ -1,7 +1,16 @@
 #include <iostream>
-using namespace std;
 
-// 仿函数 一个类重载()符号之后 表现的像函数
+// 重载 operator() 的对象称为函数对象（仿函数）。
+class Multiply {
+public:
+    explicit Multiply(int factor) : factor_(factor) {}
+    int operator()(int value) const { return factor_ * value; }
+
+private:
+    int factor_;
+};
+
 int main() {
-
+    Multiply triple(3);
+    std::cout << triple(4) << '\n';      // 对象可像函数一样调用。
 }

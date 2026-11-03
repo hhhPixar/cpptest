@@ -1,18 +1,15 @@
-#ifndef __ACCOUNT__
-#define __ACCOUNT__
+#ifndef CPP_PART1_ACCOUNT_H
+#define CPP_PART1_ACCOUNT_H
 
+// static 数据成员属于类本身，而不属于某一个 Account 对象。
+// 因此所有 Account 对象共享同一份利率。
 class Account {
 public:
-    // 静态数据只有一份 不属于对象 声明
-    static double m_rate;
-    // 静态函数 在内存只有一份
-    // 静态函数没有this 只能存取静态数据！！
-    static void set_rate(const double x) {
-        m_rate = x;
-    }
+    static void set_rate(double rate) { m_rate = rate; }
+    static double rate() { return m_rate; }
+
+private:
+    static double m_rate;  // 这里只是声明；必须在某个 .cpp 中定义一次。
 };
-// 静态数据一定要在类外面设初始化 定义=>类型+类::静态变量名
-// 类的静态数据必须要在外面定义一下这样才能给初值
-double Account::m_rate = 0.8;
 
 #endif

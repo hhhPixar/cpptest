@@ -1,43 +1,44 @@
-#ifndef __OOPDEMO__
-#define __OOPDEMO__
+#ifndef CPP_PART1_OOP_DEMO_H
+#define CPP_PART1_OOP_DEMO_H
 
-#include <string>
 #include <iostream>
+#include <string>
 
-// 继承要搭配虚函数 函数继承的函数继承的是调用权
+// 抽象基类：draw 是接口，具体图形必须实现它。
 class Shape {
 public:
-    // 纯虚函数 要求子类必须重新定义 override
+    virtual ~Shape() = default;  // 经由基类指针删除派生对象时必须使用虚析构函数。
     virtual void draw() const = 0;
+    virtual void error(const std::string& message) const {
+        std::cerr << "Shape error: " << message << '\n';
+    }
+    int object_id() const { return object_id_; }
 
-    // 虚函数 希望子类重新定义 并且有默认行为
-    virtual void error(const std::string& msg);
-
-    // 非虚函数 不希望子类去定义
-    int objectID() const;
+protected:
+    explicit Shape(int object_id = 0) : object_id_(object_id) {}
 
 private:
-    double l;
+    int object_id_;
 };
 
-// 继承
+// 模板方法示例：非虚函数固定流程，虚函数留给派生类定制步骤。
 class CDocument {
 public:
-    void onOpenFile() {
-        std::cout << "check file status" << std::endl;
-        Serialize();
-        std::cout << "close file" << std::endl;
+    virtual ~CDocument() = default;
+
+    void on_open_file() {
+        std::cout << "check file status\n";
+        serialize();                     // 动态绑定到实际对象的实现。
+        std::cout << "close file\n";
     }
 
-    virtual void Serialize() {};
+private:
+    virtual void serialize() { std::cout << "CDocument serializing...\n"; }
 };
 
-class MyDocument : public CDocument{
-public:
-    virtual void Serialize() {
-        std::cout << "MyDocument Serializing..." << std::endl;
-    }
+class MyDocument : public CDocument {
+private:
+    void serialize() override { std::cout << "MyDocument serializing...\n"; }
 };
 
-// 委托+继承
 #endif

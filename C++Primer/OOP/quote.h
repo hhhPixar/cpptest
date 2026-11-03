@@ -1,29 +1,37 @@
-#include <string>
-#include <iostream>
+#ifndef QUOTE_H
+#define QUOTE_H
 
+#include <cstddef>
+#include <string>
+
+// 多态基类：表示“按册数计算总价”的报价策略。
 class Quote {
 public:
-    // =default 表示我们需要一个自定义的构造函数 也需要一个默认的构造函数
     Quote() = default;
-    Quote(const std::string &book, double sales_price):
-        bookNo(book), price(sales_price) {}
-    
-    std::string isbin() const;
-    // virtual double net_price(std::size_t n) const = 0;
-    virtual double net_price(std::size_t n) const {return n * price;}
+    Quote(const std::string& book, double sales_price)
+        : bookNo(book), price(sales_price) {}
+
+    // 返回书号；const 保证查询不改变报价对象。
+    std::string isbn() const;
+
+    // 基类默认策略是不打折。派生类可 override 该策略。
+    virtual double net_price(std::size_t count) const { return count * price; }
+
+    // 多态基类应有 virtual 析构函数：通过 Quote* 删除派生对象时才能正确析构。
     virtual ~Quote() = default;
+
 private:
     std::string bookNo;
-// 允许派生类 访问
+
 protected:
+    // protected 允许派生类实现定价策略，但普通调用者不能直接访问价格。
     double price = 1.0;
 };
 
-// 派生类的声明 只包含类名 不包含派生列表
+// 前置声明只声明类型名；若要定义继承关系，必须给出完整类定义。
 class Bulk_quote;
 
-// error 不能派生
-// class Bulk_quote: public Quote;
+// final 禁止继续派生。
+class Final_base final {};
 
-// 不想某一个类作为基类 在声明后面加上 final
-class Base final {};
+#endif

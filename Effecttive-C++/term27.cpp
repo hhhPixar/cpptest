@@ -1,58 +1,42 @@
-// 1. (T)expression  C风格的转型
-// 2. T(expression) 函数风格的转型
-// 2种风格的转型 均称为旧式转型
-
-// C++ 提供4个新式转型
-// 1. 用于C++对象的常量转型
-// const_cast<T>(expression)
-// 2. 主要用于执行安全向下转型
-// dynamic_cast<T>(expression)
-// 3. 执行低级转型(将一个int指针指向int)
-// reinterpret_cast<T>(expression)
-// 4. 强迫隐式转换 例如 non-const 2 const; int 2 double
-// static_cast<T>(expression)
-
-// class Wight {
-// public:
-//     explicit Wight(int size);
-// };
-
-// void doSomeWork(const Wight& w);
-
-// // 将int型转换为wight 函数风格的转型更适合
-// void when_use_old_cast() {
-//     // 1. 函数风格的转型
-//     doSomeWork(Wight(15));
-//     // 2. C++风格的转型 static_cast用于隐式转换
-//     doSomeWork(static_cast<Wight>(15));
-// }
-
 #include <iostream>
-using std::endl;
-using std::cout;
+
+// Item 27：尽量使用 C++ 风格转型，并让转型意图一目了然。
+// static_cast：数值转换、明确的上行转换等受编译器检查的转换。
+// const_cast：仅增减 cv 限定；dynamic_cast：多态层次中的运行时检查；
+// reinterpret_cast：底层位模式解释，风险最高，应极少使用。
 
 class Window {
 public:
+    virtual ~Window() = default;
+
     virtual void onResize() {
-        l = 10;
+        width_ = 10;
+        height_ = 10;
     }
+
 protected:
-    int l,w;
+    int width_ = 0;
+    int height_ = 0;
 };
 
-class SpecialWindow: public Window {
+class SpecialWindow : public Window {
 public:
-    void onResize() {
-        // 当期望在子类中使用父类的方法时候 只能按照下面的方式调用 这样才能修改子类的成员
-        // 函数调用会作用在 *this上
+    void onResize() override {
+        // 调用基类版本时，限定名 Window:: 仍让函数作用于当前 *this 对象。
         Window::onResize();
-        // 下面是错误的执行方法 函数只会作用在一个副本上 不会修改子类对象的成员属性
-        // static_cast<Window>(*this).onResize();
-        cout << l << endl;
+
+        // 不要写成 static_cast<Window>(*this).onResize()：该写法先构造基类临时对象，
+        // 修改的是副本，不能更新当前 SpecialWindow 的基类子对象。
+        std::cout << "resized to " << width_ << " x " << height_ << '\n';
     }
 };
 
 int main() {
-    SpecialWindow sw;
-    sw.onResize();
+    SpecialWindow window;
+    window.onResize();
+
+    // 这里的 static_cast 明确表达了安全、可见的数值转换意图。
+    const int windowWidth = 15;
+    const double scale = static_cast<double>(windowWidth) / 10;
+    std::cout << "scale: " << scale << '\n';
 }

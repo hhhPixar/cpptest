@@ -1,8 +1,7 @@
 #include "oop-demo.h"
 
 int main() {
-    MyDocument my;
-    // 调用onOpenFile时候相当于 CDocument::onOpenFile(&my) 把调用对象的指针传递进去
-    // 然后当执行到Serialize的时候发现是虚函数就调用this->Serialize
-    my.onOpenFile();
+    MyDocument document;
+    // on_open_file 由基类提供；其中的虚调用仍会分派到 MyDocument::serialize。
+    document.on_open_file();
 }

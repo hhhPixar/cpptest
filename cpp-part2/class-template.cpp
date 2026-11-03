@@ -1,18 +1,20 @@
 #include <iostream>
-using namespace std;
 
-template<typename T>
-class complex {
+// 同一份类定义可为不同元素类型分别实例化。
+template <typename T>
+class Complex {
 public:
-    complex(T r = 0, T i = 0) :re(r), im(i){};
-    // complex& operator += (const complex& com);
-    T real() {return re;}
-    T imag() {return im;}
+    Complex(T real = T{}, T imaginary = T{}) : real_(real), imaginary_(imaginary) {}
+    T real() const { return real_; }
+    T imag() const { return imaginary_; }
+
 private:
-    T re, im;
+    T real_;
+    T imaginary_;
 };
 
 int main() {
-    complex<int> a(1,2);
-    complex<double> b(1.1, 1.2);
+    Complex<int> integer(1, 2);
+    Complex<double> decimal(1.1, 1.2);
+    std::cout << integer.real() << ' ' << decimal.imag() << '\n';
 }

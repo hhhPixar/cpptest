@@ -1,13 +1,18 @@
 #include "strblob.h"
 
-// make_shared 在动态内存中分配一个对象并初始化它
-StrBlob::StrBlob(): data(std::make_shared<std::vector<std::string>>()) {};
+#include <stdexcept>
 
-StrBlob::StrBlob(std::initializer_list<std::string> il): data(std::make_shared<std::vector<std::string>>(il)){};
+// make_shared 同时完成对象分配和 shared_ptr 建立；相比 shared_ptr(new T)，
+// 通常分配次数更少，异常安全性也更好。
+StrBlob::StrBlob()
+    : data(std::make_shared<std::vector<std::string>>()) {}
 
-void StrBlob::check(size_type i, const std::string &msg) const {
+StrBlob::StrBlob(std::initializer_list<std::string> initial_values)
+    : data(std::make_shared<std::vector<std::string>>(initial_values)) {}
+
+void StrBlob::check(size_type i, const std::string& message) const {
     if (i >= data->size()) {
-        throw std::out_of_range(msg);
+        throw std::out_of_range(message);
     }
 }
 
@@ -25,5 +30,3 @@ void StrBlob::pop_back() {
     check(0, "pop_back on empty StrBlob");
     data->pop_back();
 }
-
-

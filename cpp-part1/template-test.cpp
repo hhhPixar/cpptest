@@ -1,9 +1,10 @@
-#include "templete-com.h"
+#include "template-com.h"
 #include <iostream>
-using namespace std;
 
 int main() {
-    complex<double> cd(1.0, 2.0);
-    complex<int> ci(3,4);
-    cout << cd.imag() << endl; 
+    Complex<double> complex_double(1.0, 2.0);
+    Complex<int> complex_int(3, 4);
+
+    std::cout << complex_double.imag() << '\n';
+    std::cout << complex_int.real() << '\n';
 }

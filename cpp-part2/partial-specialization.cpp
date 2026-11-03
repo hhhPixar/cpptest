@@ -1,34 +1,33 @@
-// #1 模板参数个数上面的特化，
-// 个数上的特化才会导致temlapte<>和 var<>中的typename的个数变化
-template<typename A, typename B>
-struct test {
-    A a;
-    B b;
+#include <iostream>
+
+// 主模板适用于任意两种类型。
+template <typename First, typename Second>
+struct Test {
+    static const char* name() { return "general Test"; }
 };
 
-template<typename B>
-struct test<int, B>
-{
-    int a;
-    B b;
+// 偏特化：只固定第一个模板实参为 int，第二个仍然是模板参数。
+template <typename Second>
+struct Test<int, Second> {
+    static const char* name() { return "Test<int, Second>"; }
 };
 
-// #2 模板参数类型的偏特
 template <typename T>
 class C {
 public:
-    T c;
+    static const char* name() { return "ordinary type"; }
 };
 
-// 如果声明为指针 那么就调用这个, 相当于特别声明了要传递给什么样的类型的参数
+// 偏特化：匹配所有指针类型 T*。
 template <typename T>
 class C<T*> {
 public:
-    T* c;
+    static const char* name() { return "pointer type"; }
 };
 
-
 int main() {
-    C<int> c1;
-    C<int*> c2;
+    std::cout << Test<double, char>::name() << '\n';
+    std::cout << Test<int, char>::name() << '\n';
+    std::cout << C<int>::name() << '\n';
+    std::cout << C<int*>::name() << '\n';
 }

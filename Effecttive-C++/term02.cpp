@@ -1,36 +1,42 @@
-// 尽量使用const enum inline代替#define
+#include <iostream>
 
-// 1. 使用const代替可以保留符号信息 报错时候可以定位到具体的符号 否则只能看到1.635
-#define ASPECT_RATION 1.653
-const double AspectRatio = 1.653;
+// Item 2：优先让编译器看见常量，而不是用预处理器替换字面量。
+// 宏没有作用域和类型信息，诊断信息中往往只剩下展开后的数字。
+#define ASPECT_RATIO_MACRO 1.653
+constexpr double kAspectRatio = 1.653;
 
-// 2.class专属常量
-// 类中的静态成员
 class GamePlayer {
-public:  
-    static int getN() {
-        return NumTurns;
+public:
+    static int numTurns() {
+        return kNumTurns;
     }
+
 private:
-    // 常量声明式 如果没有声明初值 一定要有21行的定义式 一定要指定初值
-    // const int GamePlayer::NumTurns = 0; // 位于实现文件中
-    // static const int NumTurns; 
-    // 常量声明式 只声明但是没有定义 没有分配内存 实际上在c++11中不用再定义
-    static const int NumTurns = 5; 
-    // int scores[NumTurns];
+    // 整数型 static constexpr 成员可直接在类内初始化。
+    // 用它作数组长度等编译期常量时也具有清晰的类作用域。
+    static constexpr int kNumTurns = 5;
 };
-const int GamePlayer::NumTurns; // NumTurns定义 分配内存
+
+// C++11/14 中，当 constexpr 静态成员被 ODR-use 时仍需类外定义一次；
+// C++17 起 inline static data member 规则可免除此定义。
+constexpr int GamePlayer::kNumTurns;
 
 class CostEstimate {
-private: 
- static const double FudgeFactor; // 常量声明位于头文件中
-};
-const double CostEstimate::FudgeFactor=0; // static class 常量定义 位于实现文件中
+public:
+    static double fudgeFactor() {
+        return kFudgeFactor;
+    }
 
-#include <iostream>
-using std::cout;
-using std::endl;
+private:
+    // 非整型常量同样可由 constexpr 表达“编译期常量”的意图。
+    static constexpr double kFudgeFactor = 0.0;
+};
+
+constexpr double CostEstimate::kFudgeFactor;
+
 int main() {
-    // 有访问权限 需要一个静态函数访问
-    cout << GamePlayer::getN() << endl;
+    std::cout << "macro ratio: " << ASPECT_RATIO_MACRO << '\n';
+    std::cout << "typed ratio: " << kAspectRatio << '\n';
+    std::cout << "turns: " << GamePlayer::numTurns() << '\n';
+    std::cout << "fudge factor: " << CostEstimate::fudgeFactor() << '\n';
 }

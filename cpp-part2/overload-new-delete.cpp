@@ -1,39 +1,43 @@
+#include <cstddef>
 #include <iostream>
-#include <cstdlib>
+#include <new>
 
-using namespace std;
+struct ConstructionFailed {};
 
-class Bad{};
-// 一个对象new的时候先调用new分配内存 然后调用构造函数 如果ctor出现异常 就调用delete来释放内存防止内存泄露
-// 仅限g2.9 该部分了解即可
 class Foo {
 public:
-    Foo(){cout<<"Foo::Foo()"<<endl;}
-    // 故意抛出异常 测试调用重载的delete
-    Foo(int min) {cout<<"Foo::Foo(min)"<<endl; throw Bad();}
-
-    // #1 一般的new重载
-    void* operator new(size_t size) {
-        return malloc(size);
+    Foo() { std::cout << "Foo()\n"; }
+    explicit Foo(int) {
+        std::cout << "Foo(int), then throw\n";
+        throw ConstructionFailed{};
     }
 
-    // #2 placement new
-    // Foo* p = new(200)Foo; 这样调用
-    void* operator new(size_t size, long extra) {
-        return malloc(size+extra);
+    // 类专属 operator new 负责原始内存；构造成功后 delete 会调用对应的普通 delete。
+    static void* operator new(std::size_t size) {
+        std::cout << "Foo::operator new\n";
+        return ::operator new(size);
+    }
+    static void operator delete(void* memory) noexcept {
+        std::cout << "Foo::operator delete\n";
+        ::operator delete(memory);
     }
 
-    // 对应#1
-    void operator delete(void* , size_t) {
-        cout << "operator delete(void*, size_t)" << endl;
+    // 带额外参数的 new 表达式，在构造函数抛异常时匹配此 placement delete。
+    static void* operator new(std::size_t size, std::size_t extra) {
+        std::cout << "Foo::operator new with extra " << extra << '\n';
+        return ::operator new(size + extra);
     }
-
-    // 对应#2 
-    void operator delete(void* , long) {
-        cout << "operator delete(void*, long)" << endl;
-    }   
+    static void operator delete(void* memory, std::size_t) noexcept {
+        std::cout << "Foo::placement delete after failed construction\n";
+        ::operator delete(memory);
+    }
 };
 
 int main() {
-    Foo* p1 = new(300)Foo(1);
+    try {
+        Foo* unused = new (300) Foo(1);
+        (void)unused;
+    } catch (const ConstructionFailed&) {
+        std::cout << "construction failure handled\n";
+    }
 }

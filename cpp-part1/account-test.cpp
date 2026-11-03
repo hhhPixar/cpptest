@@ -1,41 +1,38 @@
 #include "account.h"
 #include <iostream>
 
-class stone {
+// 为静态数据成员提供唯一的定义和初始值。放在 .cpp 中可避免头文件多重定义。
+double Account::m_rate = 0.8;
+
+class Stone {
 public:
-    stone(double w = 0, double h = 0): w(w), h(h) {}
-    // 这里必须是const成员函数 因为在下面的min函数模板中 比较的两个对象a和b都是const的类型 运算符重载是作用在a身上 这时候调用
-    // 调用 < 符号的a必须调用const成员函数
-    bool operator < (const stone& cmp) const {
-        if(w*h<cmp.h*cmp.w) {
-            return true;
-        }
-        return false;
-    }
-    double getW() const {return w;}
+    Stone(double width = 0, double height = 0) : width_(width), height_(height) {}
+
+    // min 的实参是 const 引用，所以比较运算符也必须承诺不修改对象。
+    bool operator<(const Stone& other) const { return width_ * height_ < other.width_ * other.height_; }
+    double width() const { return width_; }
+
 private:
-    double w,h;
+    double width_;
+    double height_;
 };
 
-//  函数模板
-template<typename T>
-inline 
-const T& min(const T& a, const T& b) {
-    return a < b? a: b;
+// 返回 const 引用避免复制；只应接收在调用表达式结束后仍然存活的对象。
+template <typename T>
+const T& smaller(const T& left, const T& right) {
+    return left < right ? left : right;
 }
 
 int main() {
-    // 通过类调用静态函数
-    Account::set_rate(5.0);
-    std::cout<< Account::m_rate << std::endl;
-    Account a;
-    // 通过对象访问
-    a.set_rate(7.0);
-    std::cout << a.m_rate << std::endl;
+    Account::set_rate(5.0);              // 推荐通过类名调用静态成员。
+    std::cout << Account::rate() << '\n';
 
-    stone s1(1,2);
-    stone s2(2,3);
+    Account account;
+    account.set_rate(7.0);               // 语法允许，但仍然修改共享的类数据。
+    std::cout << Account::rate() << '\n';
 
-    s1 = min(s1, s2);
-    std::cout << s1.getW() << std::endl;
+    Stone first(1, 2);
+    Stone second(2, 3);
+    first = smaller(first, second);
+    std::cout << first.width() << '\n';
 }

@@ -1,18 +1,22 @@
 #include "complex.h"
+
 #include <iostream>
 
-using namespace std;
-
 int main() {
-    complex test(1,2);
-    complex test1(1,2);
-    cout << test.func(test1) << endl;
-    test += test1;
-    cout << test << test1 <<endl;
-    test = test1 + 1.0;
-    cout << test << endl;
-    test = 1.0 + test1;
-    cout << test << endl;
-    test  = test + test1;
-    cout << test << endl;
+    complex first(1, 2);
+    complex second(1, 2);
+
+    // 成员函数可读取同类对象的 private 成员。
+    std::cout << first.sum_parts(second) << '\n';
+
+    first += second;
+    std::cout << first << ' ' << second << '\n';
+
+    // 两个二元 + 重载分别支持 complex + double 与 double + complex。
+    first = second + 1.0;
+    std::cout << first << '\n';
+    first = 1.0 + second;
+    std::cout << first << '\n';
+    first = first + second;
+    std::cout << first << '\n';
 }

@@ -1,19 +1,13 @@
-#include<vector>
-using namespace std;
+#include <iostream>
+#include <vector>
 
 int main() {
-    vector<int> v;
-    v.push_back(1);
+    std::vector<int> values{1, 2, 3};
 
-    vector<int>::iterator ite;
-    ite = v.begin();
+    // auto 从初始化表达式推导类型，省去冗长的 std::vector<int>::iterator。
+    auto it = values.begin();
+    std::cout << *it << '\n';
 
-    // #2 ite1的类型太长 使用auto可以被自动推导
-    auto ite1 = v.end();
-
-    // # 3错误
-    // auto ite2;
-    // ite2 = v.end();
+    // auto 必须有初始化式，编译器才能完成类型推导。
+    // auto uninitialized;  // 错误：无法推导类型。
 }
-
-
